@@ -15,6 +15,7 @@ define("COLUMN_NAME", "name");
 define("COLUMN_SURNAME", "surname");
 define("COLUMN_EMAIL", "email");
 define("COLUMN_PASSWORD", "password");
+define("COLUMN_SEARCHSTRING", "SearchingString");
 
 /* actions for the USERS REST resource */
 define("ACTION_GET_USER", 33);

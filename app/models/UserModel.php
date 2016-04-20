@@ -29,7 +29,6 @@ class UserModel {
 	 */
 	public function createNewUser($newUser) {
 		// validation of the values of the new user
-		
 		// compulsory values
 		if (! empty ( $newUser [COLUMN_NAME] ) && ! empty ( $newUser [COLUMN_SURNAME] )
 			&& ! empty ( $newUser [COLUMN_EMAIL] ) && ! empty ( $newUser [COLUMN_PASSWORD] )) {
@@ -37,7 +36,6 @@ class UserModel {
 			 * the model knows the representation of a user in the database and this is:
 			 * name: varchar(25) surname: varchar(25) email: varchar(50) password: varchar(40)
 			 */
-			
 			if (($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_NAME], TABLE_USER_NAME_LENGTH ))
 				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH ))
 				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH ))
@@ -46,7 +44,6 @@ class UserModel {
 					return ($newId);
 			}
 		}
-		
 		// if validation fails or insertion fails
 		return (false);
 	}

@@ -6,13 +6,13 @@ class UserController {
 	private $slimApp;
 	private $model;
 	private $requestBody;
-	public function __construct($model, $action = null, $slimApp, $parameteres = null) {
+	public function __construct($model, $action = null, $slimApp, $parameters = null) {
 		$this->model = $model;
 		$this->slimApp = $slimApp;
 		$this->requestBody = json_decode ( $this->slimApp->request->getBody (), true ); // this must contain the representation of the new user
 		
-		if (! empty ( $parameteres [COLUMN_ID] ))
-			$id = $parameteres [COLUMN_ID];
+		if (! empty ( $parameters [COLUMN_ID] ))
+			$id = $parameters [COLUMN_ID];
 		
 		switch ($action) {
 			case ACTION_GET_USER :
@@ -31,8 +31,8 @@ class UserController {
 				$this->deleteUser ( $id );
 				break;
 			case ACTION_SEARCH_USERS :
-				$string = $parameteres ["SearchingString"];
-				$this->searchUsers ( $string );
+				$string = $parameters[COLUMN_SEARCHSTRING];
+				$this->searchUsers($string);
 				break;
 			case null :
 				$this->slimApp->response ()->setStatus ( HTTPSTATUS_BADREQUEST );
@@ -89,7 +89,7 @@ class UserController {
 		}
 	}
 	private function deleteUser($userId) {
-		$answer = $this->model->deleteUser($userID);
+		$answer = $this->model->deleteUser($userId);
 		if ($answer != NULL) {
 			/* Valid status codes for this are 200 or 204 */
 			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
@@ -130,7 +130,7 @@ class UserController {
 			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
 			$this->model->apiResponse = $answer;
 		} else {
-			$this->slimApp->response()->setStatus(HTTPSTATUS_NO_CONTENT);
+			$this->slimApp->response()->setStatus(HTTPSTATUS_NOCONTENT);
 			$Message = array(
 				GENERAL_ERROR_MESSAGE => GENERAL_SEARCH_ERROR
 			);
