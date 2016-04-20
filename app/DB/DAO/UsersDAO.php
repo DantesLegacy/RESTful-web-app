@@ -40,38 +40,76 @@ class UsersDAO {
 		return ($this->dbManager->getLastInsertedID ());
 	}
 	public function update($userID, $parametersArray) {
+		$count = $nameCount = $surnameCount = $emailCount = $passwordCount = 0;
 		/* Prepare the statement */
 		// TODO: Add count
 		$sql = "UPDATE users SET ";
-		if(is_string($parametersArray[COLUMN_NAME]))
-			$sql .= "name = ?, ";
-		if(is_string($parametersArray[COLUMN_SURNAME]))
-			$sql .= "surname = ?, ";
-		if(is_string($parametersArray[COLUMN_EMAIL]))
-			$sql .= "email = ?, ";
-		if(is_string($parametersArray[COLUMN_PASSWORD]))
-			$sql .= "password = ?, ";
-		$sql .= "WHERE id = ?";
+		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_NAME])) {
+				$sql .= "name = ?";
+				$count++;
+				$nameCount = $count;
+			}
+		}
+		if(array_key_exists(COLUMN_SURNAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_SURNAME])) {
+				if ($count > 0)
+					$sql .= ", ";
+				$sql .= "surname = ?";
+				$count++;
+				$surnameCount = $count;
+			}
+		}
+		if(array_key_exists(COLUMN_EMAIL, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_EMAIL])) {
+				if ($count > 0)
+					$sql .= ", ";
+				$sql .= "email = ?";
+				$count++;
+				$emailCount = $count;
+			}
+		}
+		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_PASSWORD])) {
+				if ($count > 0)
+					$sql .= ", ";
+				$sql .= "password = ?";
+				$count++;
+				$passwordCount = $count;
+			}
+		}
+		$sql .= " WHERE id = ?";
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
 		/* Bind the values to the statement */
-		if(is_string($parametersArray[COLUMN_NAME]))
-			$this->dbManager->bindValue($stmt, 1,
-				$parametersArray[COLUMN_NAME],$this->dbManager->STRING_TYPE);
-		if(is_string($parametersArray[COLUMN_SURNAME]))	
-			$this->dbManager->bindValue($stmt, 2,
-				$parametersArray[COLUMN_SURNAME], $this->dbManager->STRING_TYPE);
-		if(is_string($parametersArray[COLUMN_EMAIL]))
-			$this->dbManager->bindValue($stmt, 3,
-				$parametersArray[COLUMN_EMAIL], $this->dbManager->STRING_TYPE);
-		if(is_string($parametersArray[COLUMN_PASSWORD]))
-			$this->dbManager->bindValue($stmt, 4,
-				$parametersArray[COLUMN_PASSWORD], $this->dbManager->STRING_TYPE);
-		$this->dbManager->bindValue($stmt, 5, $userID, $this->dbManager->STRING_TYPE);
+		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_NAME])) {
+				$this->dbManager->bindValue($stmt, $nameCount,
+					$parametersArray[COLUMN_NAME],$this->dbManager->STRING_TYPE);
+			}
+		}
+		if(array_key_exists(COLUMN_SURNAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_SURNAME])) {	
+				$result = $this->dbManager->bindValue($stmt, $surnameCount,
+					$parametersArray[COLUMN_SURNAME], $this->dbManager->STRING_TYPE);
+			}
+		}
+		if(array_key_exists(COLUMN_EMAIL, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_EMAIL])) {
+				$this->dbManager->bindValue($stmt, $emailCount,
+					$parametersArray[COLUMN_EMAIL], $this->dbManager->STRING_TYPE);
+			}
+		}
+		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_PASSWORD])) {
+				$this->dbManager->bindValue($stmt, $passwordCount,
+					$parametersArray[COLUMN_PASSWORD], $this->dbManager->STRING_TYPE);
+			}
+		}
+		$this->dbManager->bindValue($stmt, ($count + 1), $userID, $this->dbManager->STRING_TYPE);
 		/* Execute the query */
 		$this->dbManager->executeQuery($stmt);
-		
-		return ($this->dbManager->fetchResults($stmt));
+		return ($this->dbManager->getNumberOfAffectedRows($stmt));
 	}
 	public function delete($userID) {
 		/* Prepare the query */
@@ -81,49 +119,26 @@ class UsersDAO {
 		/* Execute the query */
 		$this->dbManager->executeQuery($stmt);
 		/* Return results */
-		return ($this->dbManager->fetchResults($stmt));
+		return ($this->dbManager->getNumberOfAffectedRows($stmt));
 	}
-	public function search($parametersArray) {
+	public function search($searchString) {
 		/* Prepare the statement */
-		$count = 0;
-		/* Start of custom search string */
-		$sql = "SELECT * FROM users WHERE ";
-		/* If there is a name passed in */
-		if(is_string($parametersArray[COLUMN_NAME])) {
-			$sql .= "(name LIKE %?%) ";
-			/* Set the flag as true */
-			$searchParameterActive = true;
-			/* Increment the count */
-			$count++;
-			/* This will be used when binding values to the statement later */
-			$nameCount = $count;
-		}
-		if(is_string($parametersArray[COLUMN_SURNAME])) {
-			if ($searchParameterActive)
-				$sql .= "AND ";
-			$sql .= "(surname LIKE %?%) ";
-			$count++;
-			$surnameCount = $count;
-		}
-		/*
-		 * Not going to initialise this. Searching by email and password is not common
-		 * Maybe for when user forgets password and needs to get account? Dunno.
-		 * User should not have access to search by this.
-		 */
-//		if(is_string($parametersArray[COLUMN_EMAIL]))	
-//		if(is_string($parametersArray[COLUMN_PASSWORD]))
-
-		if($searchParameterActive) {
-			$stmt = $this->dbManager->prepareQuery($sql);
-			if(is_string($parametersArray[COLUMN_NAME]))
-				$this->dbManager->bindValue($stmt, $nameCount, $parametersArray[COLUMN_NAME], $this->dbManager->STRING_TYPE);
-			if(is_string($parametersArray[COLUMN_SURNAME]))
-				$this->dbManager->bindValue($stmt, $surnameCount, $parametersArray[COLUMN_SURNAME], $this->dbManager->STRING_TYPE);
-			/* Execute the query */
-			$this->dbManager->executeQuery($stmt);
-		}
+		$sql = "SELECT * FROM `users` WHERE (`name` LIKE ? OR `surname` LIKE ? OR `email` LIKE ?);";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$bindString = "%" . $searchString . "%";
+		
+		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
+		$this->dbManager->bindValue($stmt, 2, $bindString, $this->dbManager->STRING_TYPE);
+		$this->dbManager->bindValue($stmt, 3, $bindString, $this->dbManager->STRING_TYPE);
+				
+		$this->dbManager->executeQuery($stmt);
+		
 		/* Return results */
-		return ($this->dbManager->fetchResults($stmt));
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
 	}
 }
 ?>

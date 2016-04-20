@@ -8,10 +8,12 @@ require_once "conf/config.inc.php";
 
 $app->map ( "/users(/:id)", function ($userID = null) use($app) {
 	
-	$httpMethod = $app->request->getMethod ();
+	$body = $app->request->getBody(); // get the body of the HTTP request (from client)
+	$parameters = json_decode($body, true); // this transform the string into an associative array
+	$httpMethod = $app->request->getMethod();
 	$action = null;
-	$parameters [COLUMN_ID] = $userID; // prepare parameters to be passed to the controller (example: ID)
-	
+	$parameters[COLUMN_ID] = $userID; // prepare parameters to be passed to the controller (example: ID)
+
 	if (($userID == null) or is_numeric ( $userID )) {
 		switch ($httpMethod) {
 			case "GET" :
@@ -34,6 +36,23 @@ $app->map ( "/users(/:id)", function ($userID = null) use($app) {
 	}
 	return new loadRunMVCComponents ( "UserModel", "UserController", "jsonView", $action, $app, $parameters );
 } )->via ( "GET", "POST", "PUT", "DELETE" );
+
+$app->map ( "/search/:string", function ($searchString = null) use($app) {
+	
+	$httpMethod = $app->request->getMethod();
+	$action = null;
+	$parameters[COLUMN_SEARCHSTRING] = $searchString; // prepare parameters to be passed to the controller
+
+	if (is_string($searchString)) {
+		switch ($httpMethod) {
+			case "GET" :
+				$action = ACTION_SEARCH_USERS;
+				break;
+			default :
+		}
+	}
+	return new loadRunMVCComponents ( "UserModel", "UserController", "jsonView", $action, $app, $parameters );
+} )->via ( "GET" );
 
 $app->run ();
 class loadRunMVCComponents {
