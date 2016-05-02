@@ -30,13 +30,15 @@ class UserModel {
 	public function createNewUser($newUser) {
 		// validation of the values of the new user
 		// compulsory values
-		if (! empty ( $newUser [COLUMN_NAME] ) && ! empty ( $newUser [COLUMN_SURNAME] )
-			&& ! empty ( $newUser [COLUMN_EMAIL] ) && ! empty ( $newUser [COLUMN_PASSWORD] )) {
+		if (! empty( $newUser [COLUMN_USERNAME] ) && ! empty ( $newUser [COLUMN_NAME] )
+			&& ! empty ( $newUser [COLUMN_SURNAME] ) && ! empty ( $newUser [COLUMN_EMAIL] )
+			&& ! empty ( $newUser [COLUMN_PASSWORD] )) {
 			/*
 			 * the model knows the representation of a user in the database and this is:
 			 * name: varchar(25) surname: varchar(25) email: varchar(50) password: varchar(40)
 			 */
-			if (($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_NAME], TABLE_USER_NAME_LENGTH ))
+			if (($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH ))
+				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_NAME], TABLE_USER_NAME_LENGTH ))
 				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH ))
 				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH ))
 				&& ($this->validationSuite->isLengthStringValid ( $newUser [COLUMN_PASSWORD], TABLE_USER_PASSWORD_LENGTH ))) {
@@ -50,7 +52,11 @@ class UserModel {
 	public function updateUsers($userID, $userNewRepresentation) {
 		/* Validate the fields being entered for update of user */
 		/* If field is not empty and does not fit DB limits */
-		if ((!empty($userNewRepresentation[COLUMN_NAME])
+		if ((!empty($userNewRepresentation[COLUMN_USERNAME])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH)))
+			|| (!empty($userNewRepresentation[COLUMN_PASSWORD])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_PASSWORD], TABLE_USER_PASSWORD_LENGTH)))
+			|| (!empty($userNewRepresentation[COLUMN_NAME])
 				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH)))
 			|| (!empty($userNewRepresentation[COLUMN_SURNAME])
 				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH)))
@@ -59,26 +65,67 @@ class UserModel {
 				/* NOTE: Checking the validity of the email address in the Model Layer
 				 * as we don't want invalid data entering the database. It does not fit
 				 * in the Controller Layer as the format of the data is not it's concern */
-				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL])))
-			|| (!empty($userNewRepresentation[COLUMN_PASSWORD])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_PASSWORD], TABLE_USER_PASSWORD_LENGTH))))
+				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL]))))
 			return false;
 			
 		return ($this->UsersDAO->update($userID, $userNewRepresentation));
 	}
 	public function searchUsers($searchUserStr) {
 		/* If field is not empty and does not fit DB limits */
-		if ((!empty($searchUserStr[COLUMN_NAME])
+		if ((!empty($searchUserStr[COLUMN_USERNAME])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH)))
+			|| (!empty($searchUserStr[COLUMN_NAME])
 				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH)))
 			|| (!empty($userNewRepresentation[COLUMN_SURNAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH))))
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH)))
+			|| (!empty($userNewRepresentation[COLUMN_EMAIL])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
+				/* NOTE: Checking the validity of the email address in the Model Layer
+				 * as we don't want invalid data entering the database. It does not fit
+				 * in the Controller Layer as the format of the data is not it's concern */
+				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL])))
 			return false;	
 			
 		return ($this->UsersDAO->search($searchUserStr));
 	}
+	public function searchUsersByUsername($searchStr) {
+		if ((!empty($searchUserStr[COLUMN_USERNAME])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH))))
+			return false;
+		
+		return ($this->UsersDAO->searchUsersByUsername($searchStr));
+	}
+	public function searchUsersByName($searchStr) {
+		if ((!empty($searchUserStr[COLUMN_NAME])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH))))
+			return false;
+		
+		return ($this->UsersDAO->searchUsersByName($searchStr));
+	}
+	public function searchUsersBySurname($searchStr) {
+		if ((!empty($searchUserStr[COLUMN_SURNAME])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH))))
+			return false;
+		
+		return ($this->UsersDAO->searchUsersBySurname($searchStr));
+	}
+	public function searchUsersByEmail($searchStr) {
+		if ((!empty($searchUserStr[COLUMN_EMAIL])
+				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
+				/* NOTE: Checking the validity of the email address in the Model Layer
+				 * as we don't want invalid data entering the database. It does not fit
+				 * in the Controller Layer as the format of the data is not it's concern */
+				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL])))
+			return false;
+		
+		return ($this->UsersDAO->searchUsersByEmail($searchStr));
+	}
 	public function deleteUser($userID) {
 		return ($this->UsersDAO->delete($userID));
 	}
+//	public function authUser($name, $password) {
+//		
+//	}
 	public function __destruct() {
 		$this->UsersDAO = null;
 		$this->dbmanager->closeConnection ();
