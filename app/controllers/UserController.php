@@ -34,6 +34,27 @@ class UserController {
 				$string = $parameters[COLUMN_SEARCHSTRING];
 				$this->searchUsers($string);
 				break;
+			case ACTION_SEARCH_USERS_BY_USERNAME :
+				$string = $parameters[COLUMN_SEARCHSTRING];
+				$this->searchUsersByUsername($string);
+				break;
+			case ACTION_SEARCH_USERS_BY_NAME :
+				$string = $parameters[COLUMN_SEARCHSTRING];
+				$this->searchUsersByName($string);
+				break;
+			case ACTION_SEARCH_USERS_BY_SURNAME :
+				$string = $parameters[COLUMN_SEARCHSTRING];
+				$this->searchUsersBySurname($string);
+				break;
+			case ACTION_SEARCH_USERS_BY_EMAIL :
+				$string = $parameters[COLUMN_SEARCHSTRING];
+				$this->searchUsersByEmail($string);
+				break;	
+			case ACTION_AUTH_USER :
+				$name = $parameters[HEADER_NAME];
+				$password = $parameters[HEADER_PASSWORD];
+				$this->authUser($name, $password);
+				break;
 			case null :
 				$this->slimApp->response ()->setStatus ( HTTPSTATUS_BADREQUEST );
 				$Message = array (
@@ -43,6 +64,7 @@ class UserController {
 				break;
 		}
 	}
+	
 	private function getUsers() {
 		$answer = $this->model->getUsers ();
 		if ($answer != null) {
@@ -123,10 +145,12 @@ class UserController {
 			$this->model->apiResponse = $Message;
 		}
 	}
-	
+
+	//TODO: search for user by name, surname, etc
+	//TODO: add parameter for number of results needed
 	private function searchUsers($string) {
 		$answer = $this->model->searchUsers($string);
-		if ($answer != null) {
+		if ($answer != NULL) {
 			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
 			$this->model->apiResponse = $answer;
 		} else {
@@ -136,6 +160,72 @@ class UserController {
 			);
 			$this->model->apiResponse = $Message;
 		}
+	}
+	
+	private function searchUsersByUsername($string) {
+		$answer = $this->model->searchUsersByUsername($string);
+		if ($answer != NULL) {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+			$this->model->apiResponse = $answer;
+		} else {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_NOCONTENT);
+			$Message = array(
+				GENERAL_ERROR_MESSAGE => GENERAL_SEARCH_ERROR_USERNAME
+			);
+			$this->model->apiResponse = $Message;
+		}
+	}
+	
+	private function searchUsersByName($string) {
+		$answer = $this->model->searchUsersByName($string);
+		if ($answer != NULL) {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+			$this->model->apiResponse = $answer;
+		} else {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_NOCONTENT);
+			$Message = array(
+				GENERAL_ERROR_MESSAGE => GENERAL_SEARCH_ERROR_NAME
+			);
+			$this->model->apiResponse = $Message;
+		}
+	}
+	
+	private function searchUsersBySurname($string) {
+		$answer = $this->model->searchUsersBySurname($string);
+		if ($answer != NULL) {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+			$this->model->apiResponse = $answer;
+		} else {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_NOCONTENT);
+			$Message = array(
+				GENERAL_ERROR_MESSAGE => GENERAL_SEARCH_ERROR_SURNAME
+			);
+			$this->model->apiResponse = $Message;
+		}
+	}
+	
+	private function searchUsersByEmail($string) {
+		$answer = $this->model->searchUsersByEmail($string);
+		if ($answer != NULL) {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+			$this->model->apiResponse = $answer;
+		} else {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_NOCONTENT);
+			$Message = array(
+				GENERAL_ERROR_MESSAGE => GENERAL_SEARCH_ERROR_EMAIL
+			);
+			$this->model->apiResponse = $Message;
+		}
+	}
+	
+	private function authUser($username, $password) {
+//		$answer = $this->model->authUser($username, $password);
+//		if (answer == true) {
+//			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+//		} else {
+//			
+//		}
+		echo "TEST AUTH";
 	}
 }
 ?>

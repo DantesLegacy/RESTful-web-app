@@ -4,26 +4,44 @@ define("DB_HOST", "localhost" ); 		// set database host
 define("DB_USER", "root" ); 			// set database user
 define("DB_PASS", "" ); 				// set database password
 define("DB_PORT", 3306);				// set database port (not used)
-define("DB_NAME", "week5" ); 			// set database name
+define("DB_NAME", "music_database" );	// set database name
 define("DB_CHARSET", "utf8" ); 			// set database charset
 define("DB_DEBUGMODE", true ); 			// set database debug mode
-define ("DB_VENDOR", "mysql");			// set database vendor
+define("DB_VENDOR", "mysql");			// set database vendor
+
+/* Include file names */
+define("USER_MODEL", "UserModel");
+define("USER_CONTROLLER", "UserController");
+define("USER_VIEW", "jsonView");
 
 /* Column Names */
 define("COLUMN_ID", "id");
+define("COLUMN_USERNAME", "username");
 define("COLUMN_NAME", "name");
 define("COLUMN_SURNAME", "surname");
 define("COLUMN_EMAIL", "email");
 define("COLUMN_PASSWORD", "password");
 define("COLUMN_SEARCHSTRING", "SearchingString");
 
+/* Header Names */
+define("HEADER_USERNAME", "username");
+define("HEADER_NAME", "name");
+define("HEADER_SURNAME", "surname");
+define("HEADER_EMAIL", "email");
+define("HEADER_PASSWORD", "password");
+
 /* actions for the USERS REST resource */
-define("ACTION_GET_USER", 33);
-define("ACTION_GET_USERS", 44);
-define("ACTION_CREATE_USER", 55);
-define("ACTION_UPDATE_USER", 66);
-define("ACTION_DELETE_USER", 77);
-define("ACTION_SEARCH_USERS", 88);
+define("ACTION_GET_USER", 100);
+define("ACTION_GET_USERS", 101);
+define("ACTION_CREATE_USER", 102);
+define("ACTION_UPDATE_USER", 103);
+define("ACTION_DELETE_USER", 104);
+define("ACTION_SEARCH_USERS", 105);
+define("ACTION_SEARCH_USERS_BY_USERNAME", 106);
+define("ACTION_SEARCH_USERS_BY_NAME", 107);
+define("ACTION_SEARCH_USERS_BY_SURNAME", 108);
+define("ACTION_SEARCH_USERS_BY_EMAIL", 109);
+define("ACTION_AUTH_USER", 110);
 
 /* HTTP status codes 2xx*/
 define("HTTPSTATUS_OK", 200);
@@ -65,15 +83,20 @@ define("GENERAL_INVALIDBODY", "Request is ok but transmitted body is invalid");
 define("GENERAL_DELETE_ERROR", "Unable to delete resource");
 define("GENERAL_UPDATE_ERROR", "Unable to update resource");
 define("GENERAL_SEARCH_ERROR", "Unable to find resource");
+define("GENERAL_SEARCH_ERROR_USERNAME", "Unable to find username in database");
+define("GENERAL_SEARCH_ERROR_NAME", "Unable to find name in database");
+define("GENERAL_SEARCH_ERROR_SURNAME", "Unable to find surname in database");
+define("GENERAL_SEARCH_ERROR_EMAIL", "Unable to find email in database");
 
 define("GENERAL_WELCOME_MESSAGE", "Welcome to DIT web-services");
 define("GENERAL_INVALIDROUTE", "Requested route does not exist");
 
 
 /* representation of a new user in the DB */
-define("TABLE_USER_NAME_LENGTH", 25);
-define("TABLE_USER_SURNAME_LENGTH", 25);
+define("TABLE_USER_USERNAME_LENGTH", 30);
+define("TABLE_USER_NAME_LENGTH", 30);
+define("TABLE_USER_SURNAME_LENGTH", 30);
 define("TABLE_USER_EMAIL_LENGTH", 50);
-define("TABLE_USER_PASSWORD_LENGTH", 40);
+define("TABLE_USER_PASSWORD_LENGTH", 30);
 
 ?>

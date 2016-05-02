@@ -24,17 +24,18 @@ class UsersDAO {
 	}
 	public function insert($parametersArray) {
 		// insertion assumes that all the required parameters are defined and set
-		$sql = "INSERT INTO users (name, surname, email, password) ";
-		$sql .= "VALUES (?,?,?,?) ";
+		$sql = "INSERT INTO users (username, password, name, surname, email) ";
+		$sql .= "VALUES (?,?,?,?,?) ";
 		
 		/*
 		 * TODO: Check length of parameters from config file constants
 		 */
 		$stmt = $this->dbManager->prepareQuery ( $sql );
-		$this->dbManager->bindValue ( $stmt, 1, $parametersArray [COLUMN_NAME], $this->dbManager->STRING_TYPE );
-		$this->dbManager->bindValue ( $stmt, 2, $parametersArray [COLUMN_SURNAME], $this->dbManager->STRING_TYPE );
-		$this->dbManager->bindValue ( $stmt, 3, $parametersArray [COLUMN_EMAIL], $this->dbManager->STRING_TYPE );
-		$this->dbManager->bindValue ( $stmt, 4, $parametersArray [COLUMN_PASSWORD], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 1, $parametersArray [COLUMN_USERNAME], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 2, $parametersArray [COLUMN_PASSWORD], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 3, $parametersArray [COLUMN_NAME], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 4, $parametersArray [COLUMN_SURNAME], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 5, $parametersArray [COLUMN_EMAIL], $this->dbManager->STRING_TYPE );
 		$this->dbManager->executeQuery ( $stmt );
 		
 		return ($this->dbManager->getLastInsertedID ());
@@ -44,8 +45,26 @@ class UsersDAO {
 		/* Prepare the statement */
 		// TODO: Add count
 		$sql = "UPDATE users SET ";
+		if(array_key_exists(COLUMN_USERNAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_USERNAME])) {
+				$sql .= "username = ?";
+				$count++;
+				$usernameCount = $count;
+			}
+		}
+		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_PASSWORD])) {
+				if ($count > 0)
+					$sql .= ", ";
+				$sql .= "password = ?";
+				$count++;
+				$passwordCount = $count;
+			}
+		}
 		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
 			if(is_string($parametersArray[COLUMN_NAME])) {
+				if ($count > 0)
+					$sql .= ", ";
 				$sql .= "name = ?";
 				$count++;
 				$nameCount = $count;
@@ -69,19 +88,23 @@ class UsersDAO {
 				$emailCount = $count;
 			}
 		}
-		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
-			if(is_string($parametersArray[COLUMN_PASSWORD])) {
-				if ($count > 0)
-					$sql .= ", ";
-				$sql .= "password = ?";
-				$count++;
-				$passwordCount = $count;
-			}
-		}
+
 		$sql .= " WHERE id = ?";
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
 		/* Bind the values to the statement */
+		if(array_key_exists(COLUMN_USERNAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_USERNAME])) {
+				$this->dbManager->bindValue($stmt, $usernameCount,
+					$parametersArray[COLUMN_USERNAME], $this->dbManager->STRING_TYPE);
+			}
+		}
+		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_PASSWORD])) {
+				$this->dbManager->bindValue($stmt, $passwordCount,
+					$parametersArray[COLUMN_PASSWORD], $this->dbManager->STRING_TYPE);
+			}
+		}
 		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
 			if(is_string($parametersArray[COLUMN_NAME])) {
 				$this->dbManager->bindValue($stmt, $nameCount,
@@ -98,12 +121,6 @@ class UsersDAO {
 			if(is_string($parametersArray[COLUMN_EMAIL])) {
 				$this->dbManager->bindValue($stmt, $emailCount,
 					$parametersArray[COLUMN_EMAIL], $this->dbManager->STRING_TYPE);
-			}
-		}
-		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
-			if(is_string($parametersArray[COLUMN_PASSWORD])) {
-				$this->dbManager->bindValue($stmt, $passwordCount,
-					$parametersArray[COLUMN_PASSWORD], $this->dbManager->STRING_TYPE);
 			}
 		}
 		$this->dbManager->bindValue($stmt, ($count + 1), $userID, $this->dbManager->STRING_TYPE);
@@ -123,7 +140,7 @@ class UsersDAO {
 	}
 	public function search($searchString) {
 		/* Prepare the statement */
-		$sql = "SELECT * FROM `users` WHERE (`name` LIKE ? OR `surname` LIKE ? OR `email` LIKE ?);";
+		$sql = "SELECT * FROM `users` WHERE (`username` LIKE ? OR `name` LIKE ? OR `surname` LIKE ? OR `email` LIKE ?);";
 		
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
@@ -132,6 +149,75 @@ class UsersDAO {
 		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
 		$this->dbManager->bindValue($stmt, 2, $bindString, $this->dbManager->STRING_TYPE);
 		$this->dbManager->bindValue($stmt, 3, $bindString, $this->dbManager->STRING_TYPE);
+		$this->dbManager->bindValue($stmt, 4, $bindString, $this->dbManager->STRING_TYPE);
+				
+		$this->dbManager->executeQuery($stmt);
+		
+		/* Return results */
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
+	}
+	public function searchUsersByUsername($username) {
+		/* Prepare the statement */
+		$sql = "SELECT * FROM `users` WHERE (`username` LIKE ?);";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$bindString = "%" . $username . "%";
+		
+		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
+				
+		$this->dbManager->executeQuery($stmt);
+		
+		/* Return results */
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
+	}
+	public function searchUsersByName($name) {
+		/* Prepare the statement */
+		$sql = "SELECT * FROM `users` WHERE (`name` LIKE ?);";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$bindString = "%" . $name . "%";
+		
+		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
+				
+		$this->dbManager->executeQuery($stmt);
+		
+		/* Return results */
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
+	}
+	public function searchUsersBySurname($surname) {
+		/* Prepare the statement */
+		$sql = "SELECT * FROM `users` WHERE (`surname` LIKE ?);";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$bindString = "%" . $surname . "%";
+		
+		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
+				
+		$this->dbManager->executeQuery($stmt);
+		
+		/* Return results */
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
+	}
+	public function searchUsersByEmail($email) {
+		/* Prepare the statement */
+		$sql = "SELECT * FROM `users` WHERE (`email` LIKE ?);";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$bindString = "%" . $email . "%";
+		
+		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
 				
 		$this->dbManager->executeQuery($stmt);
 		
