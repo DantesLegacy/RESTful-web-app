@@ -30,6 +30,12 @@ define("HEADER_SURNAME", "surname");
 define("HEADER_EMAIL", "email");
 define("HEADER_PASSWORD", "password");
 
+/* Table names */
+define("USER_TABLE", "users");
+define("ARTIST_TABLE", "artists");
+define("ALBUM_TABLE", "albums");
+define("TRACK_TABLE", "tracks");
+
 /* actions for the USERS REST resource */
 define("ACTION_GET_USER", 100);
 define("ACTION_GET_USERS", 101);
@@ -41,7 +47,33 @@ define("ACTION_SEARCH_USERS_BY_USERNAME", 106);
 define("ACTION_SEARCH_USERS_BY_NAME", 107);
 define("ACTION_SEARCH_USERS_BY_SURNAME", 108);
 define("ACTION_SEARCH_USERS_BY_EMAIL", 109);
-define("ACTION_AUTH_USER", 110);
+
+/* actions for the ARTISTS REST resource */
+define("ACTION_GET_ARTIST", 200);
+define("ACTION_GET_ARTISTS", 201);
+define("ACTION_CREATE_ARTIST", 202);
+define("ACTION_UPDATE_ARTIST", 203);
+define("ACTION_DELETE_ARTIST", 204);
+define("ACTION_SEARCH_ARTISTS_BY_NAME", 205);
+
+/* actions for the ALBUMS REST resource */
+define("ACTION_GET_ALBUM", 300);
+define("ACTION_GET_ALBUMS", 301);
+define("ACTION_CREATE_ALBUM", 302);
+define("ACTION_UPDATE_ALBUM", 303);
+define("ACTION_DELETE_ALBUM", 304);
+define("ACTION_SEARCH_ALBUMS_BY_NAME", 305);
+
+/* actions for the TRACKS REST resource */
+define("ACTION_GET_TRACK", 400);
+define("ACTION_GET_TRACKS", 401);
+define("ACTION_CREATE_TRACK", 402);
+define("ACTION_UPDATE_TRACK", 403);
+define("ACTION_DELETE_TRACK", 404);
+define("ACTION_SEARCH_TRACKS_BY_NAME", 405);
+
+/* actions for the authorisation REST resource */
+define("ACTION_AUTH_USER", 500);
 
 /* HTTP status codes 2xx*/
 define("HTTPSTATUS_OK", 200);
@@ -98,5 +130,14 @@ define("TABLE_USER_NAME_LENGTH", 30);
 define("TABLE_USER_SURNAME_LENGTH", 30);
 define("TABLE_USER_EMAIL_LENGTH", 50);
 define("TABLE_USER_PASSWORD_LENGTH", 30);
+
+/* representation of a new artist in the DB */
+define("TABLE_ARTIST_NAME_LENGTH", 30);
+
+/* representation of a new album in the DB */
+define("TABLE_ALBUM_NAME_LENGTH", 30);
+
+/* representation of a new track in the DB */
+define("TABLE_TRACK_NAME_LENGTH", 30);
 
 ?>
