@@ -1,32 +1,62 @@
 <?php
 require_once "DB/pdoDbManager.php";
 require_once "DB/DAO/UsersDAO.php";
+require_once "DB/DAO/AlbumsDAO.php";
+require_once "DB/DAO/ArtistsDAO.php";
+require_once "DB/DAO/TracksDAO.php";
 require_once "Validation.php";
 class UserModel {
 	private $UsersDAO; // list of DAOs used by this model
+	private $AlbumsDAO;
+	private $ArtistsDAO;
+	private $TracksDAO;
 	private $dbmanager; // dbmanager
 	public $apiResponse; // api response
 	private $validationSuite; // contains functions for validating inputs
 	public function __construct() {
 		$this->dbmanager = new pdoDbManager ();
 		$this->UsersDAO = new UsersDAO ( $this->dbmanager );
+		$this->AlbumsDAO = new AlbumsDAO ( $this->dbmanager );
+		$this->ArtistsDAO = new ArtistsDAO ( $this->dbmanager );
+		$this->TracksDAO = new TracksDAO ( $this->dbmanager );
 		$this->dbmanager->openConnection ();
 		$this->validationSuite = new Validation ();
 	}
-	public function getUsers() {
-		return ($this->UsersDAO->get ());
+	public function getTableEntry($tableName, $id) {
+		if (is_string($tableName)) {
+			switch ($tableName) {
+				case USER_TABLE :
+					if (is_numeric($id))
+						$result = ($this->UsersDAO->get($id));
+					else
+						$result = ($this->UsersDAO->get());
+					break;
+				case ARTIST_TABLE :
+					if (is_numeric($id))
+						$result = ($this->ArtistsDAO->get($id));
+					else
+						$result = ($this->ArtistsDAO->get());
+					break;
+				case ALBUM_TABLE :
+					if (is_numeric($id))
+						$result = ($this->AlbumsDAO->get($id));
+					else
+						$result = ($this->AlbumsDAO->get());
+					break;
+				case TRACK_TABLE :
+					if (is_numeric($id))
+						$result = ($this->TracksDAO->get($id));
+					else
+						$result = ($this->TracksDAO->get());
+					break;
+			}
+		}
+		else
+			$result = false;
+			
+		return $result;
 	}
-	public function getUser($userID) {
-		if (is_numeric ( $userID ))
-			return ($this->UsersDAO->get ( $userID ));
-		
-		return false;
-	}
-	/**
-	 *
-	 * @param array $UserRepresentation:
-	 *        	an associative array containing the detail of the new user
-	 */
+
 	public function createNewUser($newUser) {
 		// validation of the values of the new user
 		// compulsory values
@@ -95,12 +125,29 @@ class UserModel {
 		
 		return ($this->UsersDAO->searchUsersByUsername($searchStr));
 	}
-	public function searchUsersByName($searchStr) {
+	public function searchTableByName($tableName, $searchStr) {
 		if ((!empty($searchUserStr[COLUMN_NAME])
 				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH))))
 			return false;
 		
-		return ($this->UsersDAO->searchUsersByName($searchStr));
+		if (is_string($tableName)) {
+			switch ($tableName) {
+					case USER_TABLE :
+						$result = ($this->UsersDAO->searchUsersByName($searchStr));
+						break;
+					case ARTIST_TABLE :
+						$result = ($this->ArtistsDAO->searchArtistsByName($searchStr));
+						break;
+					case ALBUM_TABLE :
+						$result = ($this->AlbumsDAO->searchAlbumsByName($searchStr));
+						break;
+					case TRACK_TABLE :
+						$result = ($this->TracksDAO->searchTracksByName($searchStr));
+						break;
+			}
+		}
+
+		return $result;
 	}
 	public function searchUsersBySurname($searchStr) {
 		if ((!empty($searchUserStr[COLUMN_SURNAME])
@@ -120,9 +167,101 @@ class UserModel {
 		
 		return ($this->UsersDAO->searchUsersByEmail($searchStr));
 	}
-	public function deleteUser($userID) {
-		return ($this->UsersDAO->delete($userID));
+	public function deleteTableEntry($tableName, $id) {
+		if (is_string($tableName)) {
+		switch ($tableName) {
+				case USER_TABLE :
+					$result = ($this->UsersDAO->delete($id));
+					break;
+				case ARTIST_TABLE :
+					$result = ($this->ArtistsDAO->delete($id));
+					break;
+				case ALBUM_TABLE :
+					$result = ($this->AlbumsDAO->delete($id));
+					break;
+				case TRACK_TABLE :
+					$result = ($this->TracksDAO->delete($id));
+					break;
+			}
+		}
+		return $result;
 	}
+	public function createNewArtist($newArtist) {
+		// validation of the values of the new artist
+		// compulsory values
+		if (! empty( $newArtist [COLUMN_NAME] )) {
+			/*
+			 * the model knows the representation of an artist in the database and this is:
+			 * name: varchar(30)
+			 */
+			if (($this->validationSuite->isLengthStringValid ( $newArtist [COLUMN_NAME], TABLE_ARTIST_NAME_LENGTH ))) {
+				if ($newId = $this->ArtistsDAO->insert ( $newArtist ))
+					return ($newId);
+			}
+		}
+		// if validation fails or insertion fails
+		return (false);
+	}
+	public function createNewAlbum($newAlbum) {
+		// validation of the values of the new album
+		// compulsory values
+		if (! empty( $newAlbum [COLUMN_NAME] )) {
+			/*
+			 * the model knows the representation of an album in the database and this is:
+			 * name: varchar(30)
+			 */
+			if (($this->validationSuite->isLengthStringValid ( $newAlbum [COLUMN_NAME], TABLE_ALBUM_NAME_LENGTH ))) {
+				if ($newId = $this->AlbumsDAO->insert ( $newAlbum ))
+					return ($newId);
+			}
+		}
+		// if validation fails or insertion fails
+		return (false);
+	}
+	public function createNewTrack($newTrack) {
+		// validation of the values of the new track
+		// compulsory values
+		if (! empty( $newTrack [COLUMN_NAME] )) {
+			/*
+			 * the model knows the representation of an track in the database and this is:
+			 * name: varchar(30)
+			 */
+			if (($this->validationSuite->isLengthStringValid ( $newTrack [COLUMN_NAME], TABLE_TRACK_NAME_LENGTH ))) {
+				if ($newId = $this->TracksDAO->insert ( $newTrack ))
+					return ($newId);
+			}
+		}
+		// if validation fails or insertion fails
+		return (false);
+	}
+	public function updateArtists($artistID, $artistNewRepresentation) {
+		/* Validate the fields being entered for update of artist */
+		/* If field is not empty and does not fit DB limits */
+		if ((!empty($artistNewRepresentation[COLUMN_NAME])
+				&& (!$this->validationSuite->isLengthStringValid($artistNewRepresentation[COLUMN_NAME], TABLE_ARTIST_NAME_LENGTH))))
+			return false;
+			
+		return ($this->ArtistsDAO->update($artistID, $artistNewRepresentation));
+	}
+	public function updateAlbums($albumID, $albumsNewRepresentation) {
+		/* Validate the fields being entered for update of album */
+		/* If field is not empty and does not fit DB limits */
+		if ((!empty($albumsNewRepresentation[COLUMN_NAME])
+				&& (!$this->validationSuite->isLengthStringValid($albumsNewRepresentation[COLUMN_NAME], TABLE_ALBUM_NAME_LENGTH))))
+			return false;
+			
+		return ($this->AlbumsDAO->update($albumID, $albumsNewRepresentation));
+	}
+	public function updateTracks($trackID, $trackNewRepresentation) {
+		/* Validate the fields being entered for update of track */
+		/* If field is not empty and does not fit DB limits */
+		if ((!empty($trackNewRepresentation[COLUMN_NAME])
+				&& (!$this->validationSuite->isLengthStringValid($trackNewRepresentation[COLUMN_NAME], TABLE_TRACK_NAME_LENGTH))))
+			return false;
+			
+		return ($this->TracksDAO->update($trackID, $trackNewRepresentation));
+	}
+	
 //	public function authUser($name, $password) {
 //		
 //	}

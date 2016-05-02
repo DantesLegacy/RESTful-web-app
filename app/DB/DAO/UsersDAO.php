@@ -9,6 +9,7 @@ class UsersDAO {
 		$this->dbManager = $DBMngr;
 	}
 	public function get($id = null) {
+		
 		$sql = "SELECT * ";
 		$sql .= "FROM users ";
 		if ($id != null)
@@ -43,7 +44,6 @@ class UsersDAO {
 	public function update($userID, $parametersArray) {
 		$count = $nameCount = $surnameCount = $emailCount = $passwordCount = 0;
 		/* Prepare the statement */
-		// TODO: Add count
 		$sql = "UPDATE users SET ";
 		if(array_key_exists(COLUMN_USERNAME, $parametersArray)) {
 			if(is_string($parametersArray[COLUMN_USERNAME])) {
@@ -128,11 +128,12 @@ class UsersDAO {
 		$this->dbManager->executeQuery($stmt);
 		return ($this->dbManager->getNumberOfAffectedRows($stmt));
 	}
-	public function delete($userID) {
+	public function delete($id) {
 		/* Prepare the query */
-		$stmt = $this->dbManager->prepareQuery("DELETE from users WHERE id = ?");
-		/* Bind value to query */
-		$this->dbManager->bindValue($stmt, 1, $userID, $this->dbManager->STRING_TYPE);
+		$sql = "DELETE from users WHERE id = ?";
+		$stmt = $this->dbManager->prepareQuery($sql);
+		/* Bind values to query */
+		$this->dbManager->bindValue($stmt, 1, $id, $this->dbManager->STRING_TYPE);
 		/* Execute the query */
 		$this->dbManager->executeQuery($stmt);
 		/* Return results */
@@ -158,13 +159,13 @@ class UsersDAO {
 		
 		return ($rows);
 	}
-	public function searchUsersByUsername($username) {
+	public function searchUsersByName($name) {
 		/* Prepare the statement */
-		$sql = "SELECT * FROM `users` WHERE (`username` LIKE ?);";
+		$sql = "SELECT * FROM `users` WHERE (`name` LIKE ?);";
 		
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
-		$bindString = "%" . $username . "%";
+		$bindString = "%" . $name . "%";
 		
 		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
 				
@@ -175,13 +176,13 @@ class UsersDAO {
 		
 		return ($rows);
 	}
-	public function searchUsersByName($name) {
+	public function searchUsersByUsername($username) {
 		/* Prepare the statement */
-		$sql = "SELECT * FROM `users` WHERE (`name` LIKE ?);";
+		$sql = "SELECT * FROM `users` WHERE (`username` LIKE ?);";
 		
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
-		$bindString = "%" . $name . "%";
+		$bindString = "%" . $username . "%";
 		
 		$this->dbManager->bindValue($stmt, 1, $bindString, $this->dbManager->STRING_TYPE);
 				
