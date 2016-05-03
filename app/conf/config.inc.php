@@ -109,6 +109,7 @@ define("GENERAL_APINOTEXISTING_ERROR", "Api is not existing");
 define("GENERAL_RESOURCE_CREATED", "Resource has been created");
 define("GENERAL_RESOURCE_UPDATED", "Resource has been updated");
 define("GENERAL_RESOURCE_DELETED", "Resource has been deleted");
+define("GENERAL_UNAUTHORISED_USER", "Unauthorised User");
 
 define("GENERAL_FORBIDDEN", "Request is ok but action is forbidden");
 define("GENERAL_INVALIDBODY", "Request is ok but transmitted body is invalid");

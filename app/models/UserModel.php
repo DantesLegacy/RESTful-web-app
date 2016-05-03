@@ -262,9 +262,14 @@ class UserModel {
 		return ($this->TracksDAO->update($trackID, $trackNewRepresentation));
 	}
 	
-//	public function authUser($name, $password) {
-//		
-//	}
+	public function authUser($username, $password) {
+		if (!empty($username) && !empty($password)) {
+			if (is_string($username) && is_string($password)) {
+				return ($this->UsersDAO->authenticateUser($username, $password));
+			}
+		}
+		return false;
+	}
 	public function __destruct() {
 		$this->UsersDAO = null;
 		$this->dbmanager->closeConnection ();

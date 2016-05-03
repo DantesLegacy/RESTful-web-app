@@ -227,5 +227,19 @@ class UsersDAO {
 		
 		return ($rows);
 	}
+	public function authenticateUser($username, $password) {
+		$sql = "SELECT * FROM `users` WHERE (username=? AND password=?)";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		
+		$this->dbManager->bindValue($stmt, 1, $username, $this->dbManager->STRING_TYPE);
+		$this->dbManager->bindValue($stmt, 2, $password, $this->dbManager->STRING_TYPE);
+		
+		$this->dbManager->executeQuery($stmt);
+		
+		$rows = $this->dbManager->fetchResults($stmt);
+		
+		return ($rows);
+	}
 }
 ?>
