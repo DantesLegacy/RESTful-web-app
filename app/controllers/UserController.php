@@ -52,9 +52,9 @@ class UserController {
 				$this->searchUsersByEmail($string);
 				break;	
 			case ACTION_AUTH_USER :
-				$name = $parameters[HEADER_NAME];
+				$username = $parameters[HEADER_USERNAME];
 				$password = $parameters[HEADER_PASSWORD];
-				$this->authUser($name, $password);
+				$this->authUser($username, $password);
 				break;
 			/* Artist actions */
 			case ACTION_GET_ARTIST :
@@ -282,12 +282,17 @@ class UserController {
 	}
 	
 	private function authUser($username, $password) {
-//		$answer = $this->model->authUser($username, $password);
-//		if (answer == true) {
-//			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
-//		} else {
-//			
-//		}
+		$answer = $this->model->authUser($username, $password);
+		if ($answer == true) {
+			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
+			$this->model->apiResponse = $answer;
+		} else {
+//			$this->slimApp->apiResponse()->setStatus(HTTPSTATUS_UNAUTHORIZED);
+			$this->slimApp->halt(HTTPSTATUS_UNAUTHORIZED);
+			$Message = array(
+				GENERAL_ERROR_MESSAGE => GENERAL_UNAUTHORISED_USER
+			);
+		}
 		echo "TEST AUTH";
 	}
 }
