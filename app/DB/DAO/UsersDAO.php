@@ -8,6 +8,24 @@ class UsersDAO {
 	function UsersDAO($DBMngr) {
 		$this->dbManager = $DBMngr;
 	}
+	public function hashPassword ($plaintextPassword) {
+		// generate a 16-character salt string
+		$salt = substr(str_replace('+','.',base64_encode(md5(mt_rand(), true))),0,16);
+		// how many times the string will be hashed
+		$rounds = 10000;
+		// pass in the password, the number of rounds, and the salt
+		// $5$ specifies SHA256-CRYPT, use $6$ if you really want SHA512
+		return crypt($plaintextPassword, sprintf('$5$rounds=%d$%s$', $rounds, $salt));
+		// output: $5$rounds=10000$3ES3C7XZpT7WQIuC$BEKSvZv./Y3b4ZyWLqq4BfIJzVHQweHqGBukFmo5MI8
+	}
+	public function optimize( $config )
+	{
+	  foreach ( $config as $key => $value ) 
+	    if( is_array( $value ) && count( $value ) == 1 && isset( $value[0] ))
+	       $config[$key] = $value[0];              
+	
+	  return $config;
+	}
 	public function get($id = null) {
 		
 		$sql = "SELECT * ";
@@ -33,16 +51,18 @@ class UsersDAO {
 		 */
 		$stmt = $this->dbManager->prepareQuery ( $sql );
 		$this->dbManager->bindValue ( $stmt, 1, $parametersArray [COLUMN_USERNAME], $this->dbManager->STRING_TYPE );
-		$this->dbManager->bindValue ( $stmt, 2, $parametersArray [COLUMN_PASSWORD], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 2, $this->hashPassword($parametersArray [COLUMN_PASSWORD]), $this->dbManager->STRING_TYPE );
 		$this->dbManager->bindValue ( $stmt, 3, $parametersArray [COLUMN_NAME], $this->dbManager->STRING_TYPE );
 		$this->dbManager->bindValue ( $stmt, 4, $parametersArray [COLUMN_SURNAME], $this->dbManager->STRING_TYPE );
+		/* Hash the password */
+		
 		$this->dbManager->bindValue ( $stmt, 5, $parametersArray [COLUMN_EMAIL], $this->dbManager->STRING_TYPE );
 		$this->dbManager->executeQuery ( $stmt );
 		
 		return ($this->dbManager->getLastInsertedID ());
 	}
 	public function update($userID, $parametersArray) {
-		$count = $nameCount = $surnameCount = $emailCount = $passwordCount = 0;
+		$count = $usernameCount = $nameCount = $surnameCount = $emailCount = $passwordCount = 0;
 		/* Prepare the statement */
 		$sql = "UPDATE users SET ";
 		if(array_key_exists(COLUMN_USERNAME, $parametersArray)) {
@@ -102,7 +122,8 @@ class UsersDAO {
 		if(array_key_exists(COLUMN_PASSWORD, $parametersArray)) {
 			if(is_string($parametersArray[COLUMN_PASSWORD])) {
 				$this->dbManager->bindValue($stmt, $passwordCount,
-					$parametersArray[COLUMN_PASSWORD], $this->dbManager->STRING_TYPE);
+					$this->hashPassword($parametersArray[COLUMN_PASSWORD]),
+					$this->dbManager->STRING_TYPE);
 			}
 		}
 		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
@@ -228,12 +249,26 @@ class UsersDAO {
 		return ($rows);
 	}
 	public function authenticateUser($username, $password) {
+		/* First get the password of the username */
+		$sql = "SELECT password FROM `users` WHERE (username=?)";
+		
+		$stmt = $this->dbManager->prepareQuery($sql);
+		$this->dbManager->bindValue($stmt, 1, $username, $this->dbManager->STRING_TYPE);
+		$this->dbManager->executeQuery($stmt);
+		$storedPassword = $this->dbManager->fetchResults($stmt);
+		// extract the hashing method, number of rounds, and salt from the stored hash
+		// and hash the password string accordingly
+		$storedPasswordString = array_shift($storedPassword);
+		$parts = explode('$', $storedPasswordString[COLUMN_PASSWORD]);
+		$testHash = crypt($password, sprintf('$%s$%s$%s$', $parts[1], $parts[2], $parts[3]));
+
+		/* Now check if that password matches */
 		$sql = "SELECT * FROM `users` WHERE (username=? AND password=?)";
 		
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
 		$this->dbManager->bindValue($stmt, 1, $username, $this->dbManager->STRING_TYPE);
-		$this->dbManager->bindValue($stmt, 2, $password, $this->dbManager->STRING_TYPE);
+		$this->dbManager->bindValue($stmt, 2, $testHash, $this->dbManager->STRING_TYPE);
 		
 		$this->dbManager->executeQuery($stmt);
 		

@@ -205,12 +205,15 @@ class UserModel {
 	public function createNewAlbum($newAlbum) {
 		// validation of the values of the new album
 		// compulsory values
-		if (! empty( $newAlbum [COLUMN_NAME] )) {
+		if (! empty( $newAlbum [COLUMN_NAME] )
+			&& ( $newAlbum [COLUMN_ARTIST_ID] != NULL )) {
 			/*
 			 * the model knows the representation of an album in the database and this is:
 			 * name: varchar(30)
+			 * artist_id: int(11)
 			 */
-			if (($this->validationSuite->isLengthStringValid ( $newAlbum [COLUMN_NAME], TABLE_ALBUM_NAME_LENGTH ))) {
+			if (($this->validationSuite->isLengthStringValid ( $newAlbum [COLUMN_NAME], TABLE_ALBUM_NAME_LENGTH ))
+				&& ($this->validationSuite->isNumberInRangeValid($newAlbum[COLUMN_ARTIST_ID], MIN_VALUE, MAX_VALUE))) {
 				if ($newId = $this->AlbumsDAO->insert ( $newAlbum ))
 					return ($newId);
 			}
@@ -221,12 +224,14 @@ class UserModel {
 	public function createNewTrack($newTrack) {
 		// validation of the values of the new track
 		// compulsory values
-		if (! empty( $newTrack [COLUMN_NAME] )) {
+		if (! empty( $newTrack [COLUMN_NAME] )
+			&& ( $newTrack [COLUMN_ALBUM_ID] != NULL )) {
 			/*
 			 * the model knows the representation of an track in the database and this is:
 			 * name: varchar(30)
 			 */
-			if (($this->validationSuite->isLengthStringValid ( $newTrack [COLUMN_NAME], TABLE_TRACK_NAME_LENGTH ))) {
+			if (($this->validationSuite->isLengthStringValid ( $newTrack [COLUMN_NAME], TABLE_TRACK_NAME_LENGTH ))
+				&& ($this->validationSuite->isNumberInRangeValid($newTrack[COLUMN_ALBUM_ID], MIN_VALUE, MAX_VALUE))) {
 				if ($newId = $this->TracksDAO->insert ( $newTrack ))
 					return ($newId);
 			}

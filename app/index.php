@@ -6,6 +6,32 @@ $app = new \Slim\Slim (); // slim run-time object
 
 require_once "conf/config.inc.php";
 
+function decodeParameters($app) {
+	$body = $app->request->getBody();
+	$headers = $app->request->headers;
+	return json_decode($body, true);
+}
+
+/*
+ * Need to check if Content-Type header is set or not
+ */
+function checkContentType(\Slim\Route $route) {
+	$app = \Slim\Slim::getInstance();
+	$httpMethod = $app->request->getMethod();
+	$headers = $app->request->headers;
+	$status = false;
+	
+	switch ($headers[HEADER_CONTENT_TYPE]) {
+		case RESPONSE_JSON :
+			$status = true;
+			break;
+		case RESPONSE_XML :
+			$status = true;
+			break;	
+	}
+	return $status;
+}
+
 function authenticate(\Slim\Route $route) {
 	$app = \Slim\Slim::getInstance();
 	$httpMethod = $app->request->getMethod();
@@ -13,10 +39,20 @@ function authenticate(\Slim\Route $route) {
 	
 	include_once "models/" . USER_MODEL . ".php";
 	include_once "controllers/" . USER_CONTROLLER . ".php";
-	include_once "views/" . USER_VIEW . ".php";
+	switch ($headers[HEADER_CONTENT_TYPE]) {
+		case RESPONSE_JSON :
+			include_once "views/" . USER_VIEW_JSON . ".php";
+			break;
+		case RESPONSE_XML :
+			include_once "views/" . USER_VIEW_XML . ".php";
+			break;
+	}
 	
 	switch ($httpMethod) {
 		case "GET" :
+		case "POST" :
+		case "PUT" :
+		case "DELETE" :
 			$action = ACTION_AUTH_USER;
 			break;
 	}
@@ -25,10 +61,10 @@ function authenticate(\Slim\Route $route) {
 	$controller = new UserController ( $model, $action, $app, $headers );
 }
 
-$app->map ( "/users(/:id)", "authenticate", function ($userID = null) use($app) {
+$app->map ( "/users(/:id)", "authenticate", "checkContentType", function ($userID = null) use($app) {
+//$app->map ( "/users(/:id)", "checkContentType", function ($userID = null) use($app) {
 	
-	$body = $app->request->getBody(); // get the body of the HTTP request (from client)
-	$parameters = json_decode($body, true); // this transform the string into an associative array
+	$parameters = decodeParameters($app);
 	$httpMethod = $app->request->getMethod();
 	$action = null;
 	$parameters[COLUMN_ID] = $userID; // prepare parameters to be passed to the controller (example: ID)
@@ -53,10 +89,10 @@ $app->map ( "/users(/:id)", "authenticate", function ($userID = null) use($app) 
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET", "POST", "PUT", "DELETE" );
 
-$app->map ( "/search/users/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/users/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -70,10 +106,10 @@ $app->map ( "/search/users/:string", "authenticate", function ($searchString = n
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/search/users/username/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/users/username/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -87,10 +123,10 @@ $app->map ( "/search/users/username/:string", "authenticate", function ($searchS
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/search/users/name/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/users/name/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -104,10 +140,10 @@ $app->map ( "/search/users/name/:string", "authenticate", function ($searchStrin
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/search/users/surname/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/users/surname/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -121,10 +157,10 @@ $app->map ( "/search/users/surname/:string", "authenticate", function ($searchSt
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/search/users/email/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/users/email/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -138,13 +174,12 @@ $app->map ( "/search/users/email/:string", "authenticate", function ($searchStri
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/artists(/:id)", "authenticate", function ($artistID = null) use($app) {
+$app->map ( "/artists(/:id)", "authenticate", "checkContentType", function ($artistID = null) use($app) {
 	
-	$body = $app->request->getBody(); // get the body of the HTTP request (from client)
-	$parameters = json_decode($body, true); // this transform the string into an associative array
+	$parameters = decodeParameters($app);
 	$httpMethod = $app->request->getMethod();
 	$action = null;
 	$parameters[COLUMN_ID] = $artistID; // prepare parameters to be passed to the controller (example: ID)
@@ -169,10 +204,10 @@ $app->map ( "/artists(/:id)", "authenticate", function ($artistID = null) use($a
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET", "POST", "PUT", "DELETE" );
 
-$app->map ( "/search/artists/name/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/artists/name/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -186,13 +221,12 @@ $app->map ( "/search/artists/name/:string", "authenticate", function ($searchStr
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/albums(/:id)", "authenticate", function ($albumID = null) use($app) {
+$app->map ( "/albums(/:id)", "authenticate", "checkContentType", function ($albumID = null) use($app) {
 	
-	$body = $app->request->getBody(); // get the body of the HTTP request (from client)
-	$parameters = json_decode($body, true); // this transform the string into an associative array
+	$parameters = decodeParameters($app);
 	$httpMethod = $app->request->getMethod();
 	$action = null;
 	$parameters[COLUMN_ID] = $albumID; // prepare parameters to be passed to the controller (example: ID)
@@ -217,10 +251,10 @@ $app->map ( "/albums(/:id)", "authenticate", function ($albumID = null) use($app
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET", "POST", "PUT", "DELETE" );
 
-$app->map ( "/search/albums/name/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/albums/name/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -234,13 +268,12 @@ $app->map ( "/search/albums/name/:string", "authenticate", function ($searchStri
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
-$app->map ( "/tracks(/:id)", "authenticate", function ($trackID = null) use($app) {
+$app->map ( "/tracks(/:id)", "authenticate", "checkContentType", function ($trackID = null) use($app) {
 	
-	$body = $app->request->getBody(); // get the body of the HTTP request (from client)
-	$parameters = json_decode($body, true); // this transform the string into an associative array
+	$parameters = decodeParameters($app);
 	$httpMethod = $app->request->getMethod();
 	$action = null;
 	$parameters[COLUMN_ID] = $trackID; // prepare parameters to be passed to the controller (example: ID)
@@ -265,10 +298,10 @@ $app->map ( "/tracks(/:id)", "authenticate", function ($trackID = null) use($app
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET", "POST", "PUT", "DELETE" );
 
-$app->map ( "/search/tracks/name/:string", "authenticate", function ($searchString = null) use($app) {
+$app->map ( "/search/tracks/name/:string", "authenticate", "checkContentType", function ($searchString = null) use($app) {
 	
 	$httpMethod = $app->request->getMethod();
 	$action = null;
@@ -282,16 +315,28 @@ $app->map ( "/search/tracks/name/:string", "authenticate", function ($searchStri
 			default :
 		}
 	}
-	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, USER_VIEW, $action, $app, $parameters );
+	return new loadRunMVCComponents ( USER_MODEL, USER_CONTROLLER, $action, $app, $parameters );
 } )->via ( "GET" );
 
 $app->run ();
 class loadRunMVCComponents {
 	public $model, $controller, $view;
-	public function __construct($modelName, $controllerName, $viewName, $action, $app, $parameters = null) {
+	public function __construct($modelName, $controllerName, $action, $app, $parameters = null) {
 		include_once "models/" . USER_MODEL . ".php";
 		include_once "controllers/" . USER_CONTROLLER . ".php";
-		include_once "views/" . USER_VIEW . ".php";
+		/* Check which response type to use */
+		$headers = $app->request->headers;
+		switch ($headers[HEADER_CONTENT_TYPE]) {
+			case RESPONSE_JSON :
+				include_once "views/" . USER_VIEW_JSON . ".php";
+				$viewName = USER_VIEW_JSON;
+				break;
+			case RESPONSE_XML :
+				include_once "views/" . USER_VIEW_XML . ".php";
+				$viewName = USER_VIEW_XML;
+				break;
+		}
+		
 		
 		$model = new $modelName (); // common model
 		$controller = new $controllerName ( $model, $action, $app, $parameters );
