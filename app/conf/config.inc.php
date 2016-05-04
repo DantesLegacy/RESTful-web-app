@@ -12,7 +12,8 @@ define("DB_VENDOR", "mysql");			// set database vendor
 /* Include file names */
 define("USER_MODEL", "UserModel");
 define("USER_CONTROLLER", "UserController");
-define("USER_VIEW", "jsonView");
+define("USER_VIEW_JSON", "jsonView");
+define("USER_VIEW_XML", "xmlView");
 
 /* Column Names */
 define("COLUMN_ID", "id");
@@ -22,6 +23,8 @@ define("COLUMN_SURNAME", "surname");
 define("COLUMN_EMAIL", "email");
 define("COLUMN_PASSWORD", "password");
 define("COLUMN_SEARCHSTRING", "SearchingString");
+define("COLUMN_ARTIST_ID", "artist_id");
+define("COLUMN_ALBUM_ID", "album_id");
 
 /* Header Names */
 define("HEADER_USERNAME", "username");
@@ -29,12 +32,21 @@ define("HEADER_NAME", "name");
 define("HEADER_SURNAME", "surname");
 define("HEADER_EMAIL", "email");
 define("HEADER_PASSWORD", "password");
+define("HEADER_CONTENT_TYPE", "Content-Type");
+
+/* Response Formats */
+define("RESPONSE_JSON", "json");
+define("RESPONSE_XML", "xml");
 
 /* Table names */
 define("USER_TABLE", "users");
 define("ARTIST_TABLE", "artists");
 define("ALBUM_TABLE", "albums");
 define("TRACK_TABLE", "tracks");
+
+/* Number constants */
+define("MIN_VALUE", 1);
+define("MAX_VALUE", 9999);
 
 /* actions for the USERS REST resource */
 define("ACTION_GET_USER", 100);
@@ -130,7 +142,7 @@ define("TABLE_USER_USERNAME_LENGTH", 30);
 define("TABLE_USER_NAME_LENGTH", 30);
 define("TABLE_USER_SURNAME_LENGTH", 30);
 define("TABLE_USER_EMAIL_LENGTH", 50);
-define("TABLE_USER_PASSWORD_LENGTH", 30);
+define("TABLE_USER_PASSWORD_LENGTH", 80);
 
 /* representation of a new artist in the DB */
 define("TABLE_ARTIST_NAME_LENGTH", 30);

@@ -25,26 +25,54 @@ class AlbumsDAO {
 	}
 	public function insert($parametersArray) {
 		// insertion assumes that all the required parameters are defined and set
-		$sql = "INSERT INTO albums (name) ";
-		$sql .= "VALUES (?) ";
+		$sql = "INSERT INTO albums (name, artist_id) ";
+		$sql .= "VALUES (?,?) ";
 		
 		$stmt = $this->dbManager->prepareQuery ( $sql );
 		$this->dbManager->bindValue ( $stmt, 1, $parametersArray [COLUMN_NAME], $this->dbManager->STRING_TYPE );
+		$this->dbManager->bindValue ( $stmt, 2, $parametersArray [COLUMN_ARTIST_ID], $this->dbManager->INT_TYPE );
 		$this->dbManager->executeQuery ( $stmt );
 		
 		return ($this->dbManager->getLastInsertedID ());
 	}
 	public function update($albumID, $parametersArray) {
+		$count = $nameCount = $artistIdCount = 0;
 		/* Prepare the statement */
 		$sql = "UPDATE albums SET ";
-		$sql .= "name = ?";
+		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_NAME])) {
+				$sql .= "name = ?";
+				$count++;
+				$nameCount = $count;
+			}
+		}
+		if(array_key_exists(COLUMN_ARTIST_ID, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_ARTIST_ID])) {
+				if ($count > 0)
+					$sql .= ", ";
+				$sql .= "artist_id = ?";
+				$count++;
+				$artistIdCount = $count;
+			}
+		}
+
 		$sql .= " WHERE id = ?";
 		$stmt = $this->dbManager->prepareQuery($sql);
 		
 		/* Bind the values to the statement */
-		$this->dbManager->bindValue($stmt, 1,
+		if(array_key_exists(COLUMN_NAME, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_NAME])) {
+				$this->dbManager->bindValue($stmt, $nameCount,
 					$parametersArray[COLUMN_NAME],$this->dbManager->STRING_TYPE);
-		$this->dbManager->bindValue($stmt, 2, $albumID, $this->dbManager->STRING_TYPE);
+			}
+		}
+		if(array_key_exists(COLUMN_ARTIST_ID, $parametersArray)) {
+			if(is_string($parametersArray[COLUMN_ARTIST_ID])) {
+				$this->dbManager->bindValue($stmt, $artistIdCount,
+					$parametersArray[COLUMN_ARTIST_ID],$this->dbManager->INT_TYPE);
+			}
+		}
+		$this->dbManager->bindValue($stmt, ($count + 1), $albumID, $this->dbManager->INT_TYPE);
 		/* Execute the query */
 		$this->dbManager->executeQuery($stmt);
 		return ($this->dbManager->getNumberOfAffectedRows($stmt));

@@ -254,7 +254,6 @@ class UserController {
 		$this->set_updateTableEntryResponse($answer);
 	}
 	
-	//TODO: search for user by name, surname, etc
 	//TODO: add parameter for number of results needed
 	private function searchUsers($string) {
 		$answer = $this->model->searchUsers($string);
@@ -287,13 +286,11 @@ class UserController {
 			$this->slimApp->response()->setStatus(HTTPSTATUS_OK);
 			$this->model->apiResponse = $answer;
 		} else {
-//			$this->slimApp->apiResponse()->setStatus(HTTPSTATUS_UNAUTHORIZED);
 			$this->slimApp->halt(HTTPSTATUS_UNAUTHORIZED);
 			$Message = array(
 				GENERAL_ERROR_MESSAGE => GENERAL_UNAUTHORISED_USER
 			);
 		}
-		echo "TEST AUTH";
 	}
 }
 ?>
