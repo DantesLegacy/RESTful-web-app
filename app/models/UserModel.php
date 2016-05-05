@@ -103,31 +103,31 @@ class UserModel {
 	public function searchUsers($searchUserStr) {
 		/* If field is not empty and does not fit DB limits */
 		if ((!empty($searchUserStr[COLUMN_USERNAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH)))
+				&& (!$this->validationSuite->isLengthStringValid($searchUserStr[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH)))
 			|| (!empty($searchUserStr[COLUMN_NAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH)))
-			|| (!empty($userNewRepresentation[COLUMN_SURNAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH)))
-			|| (!empty($userNewRepresentation[COLUMN_EMAIL])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
+				&& (!$this->validationSuite->isLengthStringValid($searchUserStr[COLUMN_NAME], TABLE_USER_NAME_LENGTH)))
+			|| (!empty($searchUserStr[COLUMN_SURNAME])
+				&& (!$this->validationSuite->isLengthStringValid($searchUserStr[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH)))
+			|| (!empty($searchUserStr[COLUMN_EMAIL])
+				&& (!$this->validationSuite->isLengthStringValid($searchUserStr[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
 				/* NOTE: Checking the validity of the email address in the Model Layer
 				 * as we don't want invalid data entering the database. It does not fit
 				 * in the Controller Layer as the format of the data is not it's concern */
-				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL])))
+				&& (!$this->validationSuite->isEmailValid($searchUserStr[COLUMN_EMAIL])))
 			return false;	
 			
 		return ($this->UsersDAO->search($searchUserStr));
 	}
 	public function searchUsersByUsername($searchStr) {
 		if ((!empty($searchUserStr[COLUMN_USERNAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH))))
+				&& (!$this->validationSuite->isLengthStringValid($searchStr[COLUMN_USERNAME], TABLE_USER_USERNAME_LENGTH))))
 			return false;
 		
 		return ($this->UsersDAO->searchUsersByUsername($searchStr));
 	}
 	public function searchTableByName($tableName, $searchStr) {
-		if ((!empty($searchUserStr[COLUMN_NAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_NAME], TABLE_USER_NAME_LENGTH))))
+		if ((!empty($searchStr[COLUMN_NAME])
+				&& (!$this->validationSuite->isLengthStringValid($searchStr[COLUMN_NAME], TABLE_USER_NAME_LENGTH))))
 			return false;
 		
 		if (is_string($tableName)) {
@@ -151,18 +151,18 @@ class UserModel {
 	}
 	public function searchUsersBySurname($searchStr) {
 		if ((!empty($searchUserStr[COLUMN_SURNAME])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH))))
+				&& (!$this->validationSuite->isLengthStringValid($searchStr[COLUMN_SURNAME], TABLE_USER_SURNAME_LENGTH))))
 			return false;
 		
 		return ($this->UsersDAO->searchUsersBySurname($searchStr));
 	}
 	public function searchUsersByEmail($searchStr) {
 		if ((!empty($searchUserStr[COLUMN_EMAIL])
-				&& (!$this->validationSuite->isLengthStringValid($userNewRepresentation[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
+				&& (!$this->validationSuite->isLengthStringValid($searchStr[COLUMN_EMAIL], TABLE_USER_EMAIL_LENGTH)))
 				/* NOTE: Checking the validity of the email address in the Model Layer
 				 * as we don't want invalid data entering the database. It does not fit
 				 * in the Controller Layer as the format of the data is not it's concern */
-				&& (!$this->validationSuite->isEmailValid($userNewRepresentation[COLUMN_EMAIL])))
+				&& (!$this->validationSuite->isEmailValid($searchStr[COLUMN_EMAIL])))
 			return false;
 		
 		return ($this->UsersDAO->searchUsersByEmail($searchStr));
