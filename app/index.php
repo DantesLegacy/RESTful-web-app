@@ -62,7 +62,6 @@ function authenticate(\Slim\Route $route) {
 }
 
 $app->map ( "/users(/:id)", "authenticate", "checkContentType", function ($userID = null) use($app) {
-//$app->map ( "/users(/:id)", "checkContentType", function ($userID = null) use($app) {
 	
 	$parameters = decodeParameters($app);
 	$httpMethod = $app->request->getMethod();
