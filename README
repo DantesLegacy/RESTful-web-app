@@ -1,0 +1,28 @@
+# RESTful-web-app
+Demo RESTful web application that controls access to a simple database containing tables users, artists, albums and songs
+
+This demo web application is designed to show the basics of the following web application architecture concepts:
+* Portability
+* Test Driven Development (TDD)
+* Use of Model View Controller (MVC) pattern throughout
+* Use of a PDO DB manager and DOA pattern
+* Use of DRY principle to show code refactoring
+* SHA256 authentication with username and password access
+* Show different response formats such as JSON and XML
+* Basic HTTP response codes
+* Different ROUTES and CRUD operations
+
+To use, first download XAMPP (this was tested on Windows only):
+https://www.apachefriends.org/index.html
+
+Once installed, start it up (might need to do it in Administrator Mode on Windows).
+Then start the Apache and MySQL modules.
+
+Load up PHPMyAdmin in your browser and create a database using the 'music_database.sql' file in this repo as an example.
+
+Create a new directory for this project under "xampp/htdocs" and then clone this into it.
+
+You may need to turn off the authentaication function while you get your database set up. Once you have that done,
+you can re-enable it and pass the following headers when using the app:
+username = foo
+password = bar
